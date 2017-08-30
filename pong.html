@@ -1,0 +1,111 @@
+<html>
+
+<canvas id = "gameCanvas" width = "800" height = "600"> </canvas>
+
+<script type="text/javascript">
+
+	var canvas;
+	var canvasContext;
+	var ballX = 100, ballY = 100;
+	var ballSpeedX = 10;
+	var ballSpeedY = 5;
+	var paddleSize = 100;
+	var userPaddleY;
+	var computerPaddleY = 100;
+	var direction = true;
+
+	window.onload = function(){
+
+		canvas = document.getElementById('gameCanvas');
+		canvasContext = canvas.getContext('2d');
+
+		canvas.addEventListener('mousemove', function(evt){
+			userPaddleY= mouseYPos(evt);
+		})
+
+		var fps = 30;
+		setInterval(function(){
+			drawGame();
+			moveBall();
+			checkBoundaries();
+		}, 1000/fps);
+
+
+
+	}
+
+	function drawGame(){
+
+		canvasContext.fillStyle = 'black';
+		canvasContext.fillRect(0,0,canvas.width, canvas.height);
+
+		canvasContext.fillStyle = 'white';
+		canvasContext.setLineDash([5,20]);
+		canvasContext.beginPath();
+		canvasContext.moveTo(canvas.width/2, 0);
+		canvasContext.lineTo(canvas.width/2, canvas.height);
+		canvasContext.stroke();
+
+
+		canvasContext.beginPath();
+		canvasContext.arc(ballX,ballY,15,0,2*Math.PI);
+		canvasContext.fillStyle = 'white';
+		canvasContext.fill();
+
+		createPaddles();
+
+	}
+
+	function createPaddles(){
+		//User Paddle
+		canvasContext.fillStyle = 'white';
+		canvasContext.fillRect(5,userPaddleY, 15,paddleSize);
+
+		//Game Paddle
+		canvasContext.fillStyle = 'white';
+		canvasContext.fillRect(canvas.width-20, computerPaddleY, 15, paddleSize);
+	}
+
+	function moveBall(){
+		ballX += ballSpeedX;
+		ballY += ballSpeedY;
+
+	}
+	function checkBoundaries(){
+		if(ballX >= canvas.width){ ballSpeedX *= -1; }
+		if(ballY >= canvas.height || ballY <= 0) { ballSpeedY *= -1; }
+
+		if(ballX <= 20){
+			if(ballY >= userPaddleY-10 && ballY <= (userPaddleY + paddleSize +10)){
+				ballSpeedX *= -1;
+			}
+			else{setTimeout(ballReset, 100);}
+		}
+		if(ballX >= canvas.width-20){
+			if(ballY >= computerPaddleY-10 && ballY <= (computerPaddleY + paddleSize +10)){
+				ballSpeedX *= -1;
+			}
+			else{setTimeout(ballReset, 100);}
+		}
+	}
+
+	function mouseYPos(evt){
+		var rect = canvas.getBoundingClientRect();
+		var root = document.documentElement;
+
+		var mouseY = evt.clientY - rect.top - root.scrollTop;
+		return mouseY - (paddleSize/2);
+	}
+
+	function ballReset(){
+		ballX = canvas.width/2;
+		ballY = canvas.height/2;
+		ballSpeedY *= -1;
+		direction ? ballSpeedX: ballSpeedX *= -1;
+		direction = !direction;
+
+	}
+
+</script>
+
+</html>
